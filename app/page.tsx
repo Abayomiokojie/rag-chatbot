@@ -1,6 +1,5 @@
 import Image from "next/image";
 // import { useChat } from "ai/react";
-import { useChat } from "ai/react";
 import { UIMessage } from "ai";
 
 export default function Home() {
