@@ -43,11 +43,11 @@ export default function Home() {
 
   return (
     <main className=" ">
-      <div className="border rounded-2xl h-60">
+      <div className=" h-20">
         <Image
-          className="dark:invert"
+          className="dark:invert -mt-20"
           src={F1logo}
-          alt="F1 Logo logo"
+          alt="F1GPT Logo"
           width={250}
           height={50}
           priority
@@ -55,8 +55,8 @@ export default function Home() {
       </div>
       <section className={noMessages ? "" : "populated px-4"}>
         {noMessages ? (
-          <div className="starter-text">
-            <p>
+          <div className="starter-text ">
+            <p className="font-bold">
               The Ultimate AI-powered Formula 1 chatbot. Ask me anything about
               F1!
             </p>
@@ -76,7 +76,7 @@ export default function Home() {
       {/* Updated the form handler and input change */}
       <form onSubmit={handleSubmit}>
         <input
-          className="question-box"
+          className="question-box "
           type="text"
           placeholder="Ask me anything about F1..."
           value={input}

@@ -8,7 +8,10 @@ function PromptSuggestionButton({
   onClick: () => void;
 }) {
   return (
-    <button className="prompt-suggestion-button" onClick={onClick}>
+    <button
+      className="prompt-suggestion-button hover:bg-purple-300"
+      onClick={onClick}
+    >
       {text}
     </button>
   );
