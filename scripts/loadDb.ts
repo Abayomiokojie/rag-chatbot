@@ -47,9 +47,8 @@ const f1data = [
   "https://en.wikipedia.org/wiki/Aston_Martin_in_Formula_One",
   "https://en.wikipedia.org/wiki/Haas_F1_Team",
   "https://en.wikipedia.org/wiki/McLaren_in_Formula_One",
-  "https://formula1.fandom.com/wiki/Formula_1_World_Championship",
-  "https://formula1.com/en/latest/all",
-  "https://www.autosport.com/f1/",
+  "https://www.formula1.com/en/latest/article/youve-driven-insane-this-year-norris-fellow-drivers-congratulate-him-on-his.E68tNnOj8UI3Y3UPzQAi4",
+  "https://www.autosport.com/f1/news/how-mclaren-disarmed-a-key-verstappen-tactic-to-help-norris-win-the-2025-f1-title/10783286/",
   "https://www.formula1.com/en/racing/2024.html",
   "https://en.wikipedia.org/wiki/List_of_Formula_One_World_Drivers%27_Champions",
 ];
@@ -99,7 +98,7 @@ const loadData = async () => {
 };
 
 const ScrapePage = async (url: string) => {
-  const loader = new PuppeteerWebBaseLoader("https:exampleurl.com", {
+  const loader = new PuppeteerWebBaseLoader(url, {
     launchOptions: {
       headless: true,
     },
@@ -107,14 +106,48 @@ const ScrapePage = async (url: string) => {
       waitUntil: "domcontentloaded",
     },
     evaluate: async (page, browser) => {
-      const result = await page.evaluate(() => document.body.innerHTML);
-      await browser.close();
-      return result;
+      // const result = await page.evaluate(() => document.body.innerHTML);
+      // await browser.close();
+      // return result;
+
+      try {
+        // Strategy 1: Try to get main article text
+        const articleText = await page.evaluate(() => {
+          // Common selectors for article content
+          const selectors = [
+            "article",
+            "main",
+            '[role="main"]',
+            ".post-content",
+            ".entry-content",
+            "#content",
+          ];
+
+          for (const selector of selectors) {
+            const element = document.querySelector(selector);
+            if (element) {
+              // Return text content, removing extra whitespace
+              return element.textContent?.replace(/\s+/g, " ").trim() || "";
+            }
+          }
+
+          // Fallback: get body text but exclude script/style elements
+          return document.body.innerText.replace(/\s+/g, " ").trim();
+        });
+
+        await browser.close();
+        return articleText;
+      } catch (error) {
+        console.error(`Error scraping ${url}:`, error);
+        await browser.close();
+        return "";
+      }
     },
   });
 
   const scraped = await loader.scrape();
-  return scraped?.replace(/<[^>]*>?/gm, " ").trim() || "";
+  // return scraped?.replace(/<[^>]*>?/gm, " ").trim() || "";
+  return scraped || "";
 };
 
 createCollection().then(() => loadData());
