@@ -42,16 +42,18 @@ export default function Home() {
   };
 
   return (
-    <main>
-      <Image
-        className="dark:invert"
-        src={F1logo}
-        alt="Next.js logo"
-        width={250}
-        height={50}
-        priority
-      />
-      <section className={noMessages ? "" : "populated"}>
+    <main className=" ">
+      <div className="border rounded-2xl h-60">
+        <Image
+          className="dark:invert"
+          src={F1logo}
+          alt="F1 Logo logo"
+          width={250}
+          height={50}
+          priority
+        />
+      </div>
+      <section className={noMessages ? "" : "populated px-4"}>
         {noMessages ? (
           <div className="starter-text">
             <p>
@@ -62,7 +64,7 @@ export default function Home() {
             <PromptSuggestions onPromptClick={handlePrompt} />
           </div>
         ) : (
-          <div>
+          <div className="grid gap-y-2">
             {messages.map((message, index: number) => (
               <Bubble key={`message-${index}`} message={message} />
             ))}
