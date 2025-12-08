@@ -3,7 +3,7 @@
 import Image from "next/image";
 import F1logo from "./assets/f1logo.png";
 import { useChat } from "@ai-sdk/react";
-import { useState } from "react"; // Import useState
+import { useEffect, useState } from "react";
 import Bubble from "./components/Bubble";
 import LoadingBubble from "./components/LoadingBubble";
 import PromptSuggestions from "./components/PromptSuggestions";
@@ -14,16 +14,20 @@ export default function Home() {
 
   const { messages, sendMessage, status } = useChat();
 
-  // const { messages, sendMessage, status } = useChat({
-  //   transport: new DefaultChatTransport({
-  //     api: "/api/chat",
-  //   }),
-  // });
+  useEffect(() => {
+    console.log("Messages updated:", messages);
+  }, [messages]);
+
+  // Log status changes
+  useEffect(() => {
+    console.log(" Status changed:", status);
+  }, [status]);
 
   const isLoading = status === "submitted" || status === "streaming";
   const noMessages = !messages || messages.length === 0;
 
   const handlePrompt = (promptText: string) => {
+    console.log(" Sending prompt:", promptText);
     // Used sendMessage instead of append
     sendMessage({ text: promptText });
   };
@@ -31,13 +35,14 @@ export default function Home() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (input.trim()) {
+      console.log(" Sending message:", input);
       sendMessage({ text: input });
       setInput("");
     }
   };
 
   return (
-    <main className="items-center justify-between bg-white ">
+    <main>
       <Image
         className="dark:invert"
         src={F1logo}
@@ -61,11 +66,10 @@ export default function Home() {
             {messages.map((message, index: number) => (
               <Bubble key={`message-${index}`} message={message} />
             ))}
+
             {isLoading && <LoadingBubble />}
           </div>
         )}
-
-        {/* <LoadingBubble /> */}
       </section>
       {/* Updated the form handler and input change */}
       <form onSubmit={handleSubmit}>
@@ -74,7 +78,7 @@ export default function Home() {
           type="text"
           placeholder="Ask me anything about F1..."
           value={input}
-          onChange={(e) => setInput(e.target.value)} // Use setInput
+          onChange={(e) => setInput(e.target.value)} // Used setInput
           disabled={isLoading}
         ></input>
         <input type="submit" value="Send" disabled={isLoading} />

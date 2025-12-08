@@ -1,17 +1,3 @@
-// import type { Message } from "@ai-sdk/react";
-
-// interface BubbleProps {
-//   message: Message;
-// }
-
-// function Bubble({ message }) {
-//   const { role, content } = message;
-//   return <div className={`${role}bubble`}>{content}</div>;
-// }
-
-// export default Bubble;
-
-// components/Bubble.tsx
 import type { UIMessage } from "@ai-sdk/react";
 
 interface BubbleProps {

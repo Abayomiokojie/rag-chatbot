@@ -43,9 +43,8 @@ export async function POST(req: Request) {
     );
 
     const { messages } = requestBody;
-    // const latestMessage = messages[messages.length - 1]?.content;
 
-    const modelMessages = convertToModelMessages(messages);
+    // const modelMessages = convertToModelMessages(messages);
 
     type TextPart = {
       type: "text";
@@ -107,7 +106,7 @@ export async function POST(req: Request) {
       const documents = await cursor.toArray();
       const docsMap = documents?.map((doc) => doc.text) || [];
       console.log("🔍 Number of documents found:", documents.length);
-      console.log("📄 Retrieved document texts:", docsMap); // This is already your docContext
+      console.log("📄 Retrieved document texts:", docsMap);
       docContext = docsMap.join("\n\n"); // Better than JSON.stringify for context
     } catch (err) {
       console.error("Error querying collection:", err);
@@ -115,44 +114,53 @@ export async function POST(req: Request) {
     }
 
     // Add your system message to the beginning
-    const allMessages = [
-      {
-        role: "system" as const,
-        content: `You are a knowledgeable Formula 1 assistant. Use the following context to augment what you know about Formula One racing. 
-        The context will provide you with the most recent page data from Wikipedia, the official F1 website and others.
-        If the context does not contain information relevant to the user's question, rely on your own knowledge, and don't mention the source of your information or what the context does or does not include.
-        Format responses using markdown where applicable and don't return images.
-        ----------------
-        START CONTEXT
-        ${docContext}
-        END CONTEXT
-        ----------------
-        QUESTION: ${latestMessage}
-        ----------------`,
-      },
-      ...modelMessages,
-    ];
+    // const allMessages = [
+    //   {
+    //     role: "system" as const,
+    //     content: `You are a knowledgeable Formula 1 assistant. Use the following context to augment what you know about Formula One racing.
+    //     The context will provide you with the most recent page data from Wikipedia, the official F1 website and others.
+    //     If the context does not contain information relevant to the user's question, rely on your own knowledge, and don't mention the source of your information or what the context does or does not include.
+    //     Format responses using markdown where applicable and don't return images.
+    //     ----------------
+    //     START CONTEXT
+    //     ${docContext}
+    //     END CONTEXT
+    //     ----------------
+    //     QUESTION: ${latestMessage}
+    //     ----------------`,
+    //   },
+    //   ...modelMessages,
+    // ];
 
     // V5: Use streamText instead of OpenAIStream
     const result = await streamText({
       model: aiSdkOpenAI("gpt-4-turbo"), // V5 syntax
-      // system: `You are a knowledgeable Formula 1 assistant. Use the following context to augment what you know about Formula One racing.
-      // The context will provide you with the most recent page data from Wikipedia, the official F1 website and others.
-      // If the context does not contain information relevant to the user's question, rely on your own knowledge, and don't mention the source of your information or what the context does or does not include.
-      // Format responses using markdown where applicable and don't return images.
-      // ----------------
-      // START CONTEXT
-      // ${docContext}
-      // END CONTEXT
-      // ----------------
-      // QUESTION: ${latestMessage}
-      // ----------------`,
-      // messages: messages, // Pass the conversation history
-      messages: allMessages,
+      system: `You are a knowledgeable Formula 1 assistant. Use the following context to augment what you know about Formula One racing.
+      The context will provide you with the most recent page data from Wikipedia, the official F1 website and others.
+      If the context does not contain information relevant to the user's question, rely on your own knowledge, and don't mention the source of your information or what the context does or does not include.
+      Format responses using markdown where applicable and don't return images.
+      ----------------
+      START CONTEXT
+      ${docContext}
+      END CONTEXT
+      ----------------
+      QUESTION: ${latestMessage}
+      ----------------`,
+      messages: convertToModelMessages(messages),
+      // messages: allMessages,
     });
 
+    // After creating the result - Logging and Debugging
+    console.log("Result type:", result.constructor.name);
+    console.log(
+      "Available methods:",
+      Object.getOwnPropertyNames(Object.getPrototypeOf(result)).filter(
+        (name) => name.startsWith("to") && name.endsWith("Response")
+      )
+    );
+
     // Return the stream directly
-    return result.toTextStreamResponse();
+    return result.toUIMessageStreamResponse();
   } catch (error) {
     console.error("Error in POST handler:", error);
     return new Response(
